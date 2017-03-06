@@ -25,7 +25,6 @@ echo "$f"
 -J--add-opens \
 -Jjdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED \
 --add-modules java.xml.ws.annotation \
--Xdiags:verbose \
 -cp "/d/workspaces/lombok/lombok/dist/lombok.jar$LIBS" \
 -d . \
 "$f"

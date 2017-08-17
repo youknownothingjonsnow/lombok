@@ -151,6 +151,10 @@ public class HandleConstructor {
 	}
 	
 	public static List<JavacNode> findAllFields(JavacNode typeNode) {
+		return findAllFields(typeNode, false);
+	}
+	
+	public static List<JavacNode> findAllFields(JavacNode typeNode, boolean evenFinalInitialized) {
 		ListBuffer<JavacNode> fields = new ListBuffer<JavacNode>();
 		for (JavacNode child : typeNode.down()) {
 			if (child.getKind() != Kind.FIELD) continue;
@@ -162,7 +166,7 @@ public class HandleConstructor {
 			if ((fieldFlags & Flags.STATIC) != 0) continue;
 			//Skip initialized final fields
 			boolean isFinal = (fieldFlags & Flags.FINAL) != 0;
-			if (!isFinal || fieldDecl.init == null) fields.append(child);
+			if (evenFinalInitialized || !isFinal || fieldDecl.init == null) fields.append(child);
 		}
 		return fields.toList();
 	}
@@ -295,7 +299,7 @@ public class HandleConstructor {
 		}
 		
 		JCModifiers mods = maker.Modifiers(toJavacModifier(level), List.<JCAnnotation>nil());
-		if (!allToDefault && !suppressConstructorProperties && level != AccessLevel.PRIVATE && level != AccessLevel.PACKAGE && !isLocalType(typeNode) && LombokOptionsFactory.getDelombokOptions(typeNode.getContext()).getFormatPreferences().generateConstructorProperties()) {
+		if (!allToDefault && !suppressConstructorProperties && !isLocalType(typeNode) && LombokOptionsFactory.getDelombokOptions(typeNode.getContext()).getFormatPreferences().generateConstructorProperties()) {
 			addConstructorProperties(mods, typeNode, fields);
 		}
 		if (onConstructor != null) mods.annotations = mods.annotations.appendList(copyAnnotations(onConstructor));

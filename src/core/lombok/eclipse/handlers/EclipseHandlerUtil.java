@@ -167,6 +167,7 @@ public class EclipseHandlerUtil {
 	}
 	
 	public static boolean isFieldDeprecated(EclipseNode fieldNode) {
+		if (!(fieldNode.get() instanceof FieldDeclaration)) return false;
 		FieldDeclaration field = (FieldDeclaration) fieldNode.get();
 		if ((field.modifiers & ClassFileConstants.AccDeprecated) != 0) {
 			return true;
@@ -440,6 +441,24 @@ public class EclipseHandlerUtil {
 			// intentional fallthrough
 		default:
 			return false;
+		}
+	}
+	
+	public static EclipseNode findAnnotation(Class<? extends java.lang.annotation.Annotation> type, EclipseNode node) {
+		if (node == null) return null;
+		if (type == null) return null;
+		switch (node.getKind()) {
+		case ARGUMENT:
+		case FIELD:
+		case LOCAL:
+		case TYPE:
+		case METHOD:
+			for (EclipseNode child : node.down()) {
+				if (annotationTypeMatches(type, child)) return child;
+			}
+			// intentional fallthrough
+		default:
+			return null;
 		}
 	}
 	

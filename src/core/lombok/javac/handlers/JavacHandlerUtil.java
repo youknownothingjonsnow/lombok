@@ -191,6 +191,27 @@ public class JavacHandlerUtil {
 		}
 	}
 	
+	static JavacNode findAnnotation(Class<? extends Annotation> type, JavacNode node, boolean delete) {
+		if (node == null) return null;
+		if (type == null) return null;
+		switch (node.getKind()) {
+		case ARGUMENT:
+		case FIELD:
+		case LOCAL:
+		case TYPE:
+		case METHOD:
+			for (JavacNode child : node.down()) {
+				if (annotationTypeMatches(type, child)) {
+					if (delete) deleteAnnotationIfNeccessary(child, type);
+					return child;
+				}
+			}
+			// intentional fallthrough
+		default:
+			return null;
+		}
+	}
+	
 	/**
 	 * Checks if the Annotation AST Node provided is likely to be an instance of the provided annotation type.
 	 * 
@@ -222,6 +243,7 @@ public class JavacHandlerUtil {
 	 * @return {@code true} if a field is marked deprecated, either by {@code @Deprecated} or in javadoc, otherwise {@code false}
 	 */
 	public static boolean isFieldDeprecated(JavacNode field) {
+		if (!(field.get() instanceof JCVariableDecl)) return false;
 		JCVariableDecl fieldNode = (JCVariableDecl) field.get();
 		if ((fieldNode.mods.flags & Flags.DEPRECATED) != 0) {
 			return true;
